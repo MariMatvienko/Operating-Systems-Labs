@@ -67,19 +67,19 @@ int main(void)
         {
             const char msg[] = "error: dup2 failed\n";
             write(STDERR_FILENO, msg, strlen(msg));
-            exit(EXIT_FAILURE);
+            _exit(EXIT_FAILURE);
         }
         if (dup2(file_fd, STDOUT_FILENO) == -1) // меняю стандартный поток для вывода данных на указанный файл
         {
             const char msg[] = "error: dup2 failed\n";
             write(STDERR_FILENO, msg, strlen(msg));
-            exit(EXIT_FAILURE);
+            _exit(EXIT_FAILURE);
         }
         if (dup2(pipe_error[1], STDERR_FILENO) == -1) // меняю стандартный поток ошибок на вход трубы для передачи ошибок
         {
             const char msg[] = "error: dup2 failed\n";
             write(STDERR_FILENO, msg, strlen(msg));
-            exit(EXIT_FAILURE);
+            _exit(EXIT_FAILURE);
         }
 
         close(pipe_data[0]); // так как мы уже перенаправили трубу на стандартный поток, то закрываем исходный дескриптор
@@ -91,7 +91,7 @@ int main(void)
         {
 			const char msg[] = "error: failed to exec into new executable image\n";
 			write(STDERR_FILENO, msg, strlen(msg));
-			exit(EXIT_FAILURE);
+			_exit(EXIT_FAILURE);
 		}
     } else // если я родитель, child != нулю и мы попадаем сюда
     {
