@@ -137,8 +137,6 @@ int main(int argc, char** argv)
         {
             result += tasks[i].result;
         }
-
-        //  
         out_str("Из ");
         out_uint(n);
         out_str(" перемешивания(ий) колоды ");
