@@ -106,47 +106,57 @@ int main(int argc, char** argv)
 	size_t T = (size_t)t;
 	size_t N = (size_t)n;
 
-    struct timespec start, stop;  // таймер
-	clock_gettime(CLOCK_MONOTONIC, &start);
-
-    pthread_t *threads = malloc(T * sizeof(pthread_t)); // массив номеров
-	Task *tasks = malloc(T * sizeof(Task)); // массив заданий
-	if (!threads || !tasks)
-		return 1;
-    
-    for (int i = 0; i < T; i++) 
+    uint64_t buf = 0;
+    int maxp = 25;
+    for (int p = 0; p < maxp; p++)
     {
-		tasks[i].thread_id = i;
-		tasks[i].start = i * N / T;
-		tasks[i].end = (i + 1) * N / T;
-		tasks[i].result = 0;
-	}
+        struct timespec start, stop;  // таймер
+        clock_gettime(CLOCK_MONOTONIC, &start);
 
-    for (int i = 0; i < T; i++)
-        pthread_create(&threads[i], NULL, work, &tasks[i]);
+        pthread_t *threads = malloc(T * sizeof(pthread_t)); // массив номеров
+        Task *tasks = malloc(T * sizeof(Task)); // массив заданий
+        if (!threads || !tasks)
+            return 1;
 
-    for (int i = 0; i < T; i++)
-		pthread_join(threads[i], NULL);
+        for (int i = 0; i < T; i++) 
+        {
+            tasks[i].thread_id = i;
+            tasks[i].start = i * N / T;
+            tasks[i].end = (i + 1) * N / T;
+            tasks[i].result = 0;
+        }
 
-    int result = 0;
-    for (int i = 0; i < T; i++)
-    {
-        result += tasks[i].result;
+        for (int i = 0; i < T; i++)
+            pthread_create(&threads[i], NULL, work, &tasks[i]);
+
+        for (int i = 0; i < T; i++)
+            pthread_join(threads[i], NULL);
+
+        int result = 0;
+        for (int i = 0; i < T; i++)
+        {
+            result += tasks[i].result;
+        }
+
+        //  
+        out_str("Из ");
+        out_uint(n);
+        out_str(" перемешивания(ий) колоды ");
+        out_uint(result);
+        out_str(" раз первые две карты оказались одинаковыми по масти или номиналу.\n");
+
+        out_str("Теоретическая вероятность этого равна 390/1326 ~ 0,294.\n");
+
+        clock_gettime(CLOCK_MONOTONIC, &stop);
+        long long delta_ms = (long long)(stop.tv_sec - start.tv_sec) * 1000 + (long long)(stop.tv_nsec - start.tv_nsec) / 1000000;
+
+        out_str("Время выполнения: ");
+        out_uint(delta_ms);
+        out_str(" милисекунд(ы)\n");
+        buf += delta_ms;
     }
+    out_str("Среднее время выполнения: ");
+    out_uint(buf/ maxp);
+    out_str(" милисекунд(ы)\n");
 
-    //  
-    out_str("Из ");
-    out_uint(n);
-    out_str(" перемешивания(ий) колоды ");
-    out_uint(result);
-    out_str(" раз первые две карты оказались одинаковыми по масти или номиналу.\n");
-
-    out_str("Теоретическая вероятность этого равна 390/1326 ~ 0,294.\n");
-
-    clock_gettime(CLOCK_MONOTONIC, &stop);
-	long long delta_ms = (long long)(stop.tv_sec - start.tv_sec) * 1000 + (long long)(stop.tv_nsec - start.tv_nsec) / 1000000;
-
-	out_str("Время выполнения: ");
-	out_uint(delta_ms);
-	out_str(" милисекунд(ы)\n");
 }
